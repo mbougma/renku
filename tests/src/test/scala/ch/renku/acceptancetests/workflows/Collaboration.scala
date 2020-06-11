@@ -7,7 +7,6 @@ import ch.renku.acceptancetests.pages.GitLabPages.GitLabBaseUrl
 import org.openqa.selenium.{WebDriver, WebElement}
 import scala.jdk.CollectionConverters._
 import org.scalatestplus.selenium.WebBrowser.{cssSelector, find}
-import scala.concurrent.duration._
 import scala.language.postfixOps
 import scala.concurrent.duration._
 
@@ -67,24 +66,6 @@ trait Collaboration {
     sleep(3 seconds)
   }
 
-  // def addBranchToProject(implicit projectDetails: ProjectDetails, gitLabBaseUrl: GitLabBaseUrl): Unit = {
-  //   val projectPage = ProjectPage()
-  //   When("the user clicks on the 'View in GitLab'")
-  //   click on projectPage.viewInGitLab sleep (1 second)
-  //   Then("a new tab with GitLab page should open")
-  //   val gitLabPages = GitLabPages()
-  //   verify browserSwitchedTo gitLabPages.ProjectPage
-  //   When("the user navigates to the Project Settings")
-  //   go to gitLabPages.SettingsPage
-  //   verify browserSwitchedTo gitLabPages.SettingsPage
-  //   // And("they click on the Expand button in the Advanced section")
-  //   // click on gitLabPages.SettingsPage.Advanced.expandButton sleep (1 second)
-  //   // And("they click on the Remove project button")
-  //   // click on gitLabPages.SettingsPage.Advanced.removeProject sleep (1 second)
-  //   // And("they confirm the project removal")
-  //   // gitLabPages.SettingsPage.Advanced confirmRemoval projectDetails sleep (1 second)
-  // }
-
   def addBranchToProjectInGitLab(implicit projectDetails: ProjectDetails, gitLabBaseUrl: GitLabBaseUrl): Unit = {
     val projectPage = ProjectPage()
     When("the user clicks on the 'View in GitLab' button")
@@ -99,30 +80,6 @@ trait Collaboration {
     go to gitLabPages.NewBranchPage
     verify browserSwitchedTo gitLabPages.NewBranchPage sleep (1 second)
     Then("the fills in the new branch form")
-    // And("they click on the Expand button in the Advanced section")
-    // click on gitLabPages.SettingsPage.Advanced.expandButton sleep (1 second)
-
-    // val tabs = webDriver.getWindowHandles.asScala.toArray
-    // webDriver.switchTo() window tabs(1)
-    // And("click on the project branches button")
-    // verify browserSwitchedTo gitLabPages.ProjectPage
-    // Then("the browser switched to gitlab project")
-    // click on gitLabPages.ProjectPage.projectBranchesButton sleep (4 seconds)
-    // And("the user clicks on the Branches link")
-    // verify browserSwitchedTo gitLabPages.ProjectBranchesPage
-    // Then("a the user is redirected to the branches page for the project")
-    // verify browserSwitchedTo gitLabPages.ProjectBranchesPage
-    // When("the user clicks on the 'New Branch' button")
-    // click on gitLabPages.ProjectBranchesPage.newBranchButton sleep (4 seconds)
-    // go to gitLabPages.NewBranchPage
-    // // Then("the user is redirected to the new branch form for the project")
-    // // go to gitLabPages.ProjectBranchesPage sleep (2 seconds)
-    // // verify browserSwitchedTo gitLabPages.ProjectBranchesPage
-    // // Then("the user is redirected to the new branch form for the project")
-    // // go to gitLabPages.NewBranchPage sleep (2 seconds)
-    // verify browserSwitchedTo gitLabPages.NewBranchPage
-    // Then("the branch gets created.")
-    // gitLabPages.NewBranchPage.submitNewBranchForm() sleep (1 second)
   }
 
   def verifyBranchWasAdded(implicit projectDetails: ProjectDetails): Unit = {
@@ -133,19 +90,38 @@ trait Collaboration {
     verify userCanSee projectPage.Collaboration.MergeRequests.futureMergeRequestBanner
   }
 
-  // def goToGitLabNewBranch(implicit webDriver: WebDriver): WebElement = eventually {
-  //   find(cssSelector("#content-body > div.top-area.adjust > div > a.btn.btn-success"))
-  //     .getOrElse(fail("Advanced -> Project removal Confirm button not found"))
-  //     .click()
-  // }
+  def createNewMergeRequest(implicit projectDetails: ProjectDetails): Unit = {
+    implicit val projectPage = ProjectPage()
+    When("the user navigates to the Collaboration tab")
+    click on projectPage.Collaboration.tab
+    And("they navigate to the Merge Request sub tab")
+    click on projectPage.Collaboration.MergeRequests.tab
+    // Give some time for the tab change to take effect
+    sleep(4 second)
+    And("the user clicks on the 'Create Merge Request' button")
+    click on projectPage.Collaboration.MergeRequests.createMergeRequestButton
+    sleep(4 seconds)
+    And("they navigate to the MergeRequest sub tab")
+    click on projectPage.Collaboration.MergeRequests.tab
+    sleep(3 seconds)
+    Then("the new Merge Request should be displayed in the list")
+    val mrTitles = projectPage.Collaboration.MergeRequests.mergeRequestsTitle
+    if (mrTitles.size < 1) fail("There should be at least one merge request")
+    mrTitles.find(_ == "test-branch") getOrElse fail("Merge Request with expected title could not be found.")
+  }
 
-  // def goToGitlabBranches(implicit webDriver: WebDriver): WebElement = eventually {
-  //   find(
-  //     cssSelector(
-  //       "#content-body > div.limit-container-width > div.js-show-on-project-root.project-home-panel > nav > div > ul > li:nth-child(2) > a"
-  //     )
-  //   ).getOrElse(fail("Advanced -> Project removal Confirm button not found"))
-  //     .click()
-  // }
+  def createBranchInJupyterLab(jupyterLabPage: JupyterLabPage): Unit = {
+    import jupyterLabPage.terminal
+    And("Creates a test branch")
+    terminal %> "git checkout -b test-branch" sleep (10 seconds)
+    And("Adds some Python packages to the requirements.txt")
+    terminal %> "echo pandas==0.25.3 >> requirements.txt" sleep (1 second)
+    terminal %> "echo seaborn==0.9.0 >> requirements.txt" sleep (1 second)
+    And("Pushes changes to branch")
+    terminal %> "git add ." sleep (2 seconds)
+    terminal %> "git push --set-upstream origin test-branch" sleep (3 seconds)
+    And("Checks out master again")
+    terminal %> "git checkout master" sleep (4 seconds)
+  }
 
 }

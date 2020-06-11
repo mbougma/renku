@@ -82,9 +82,23 @@ class ProjectPage(projectSlug: String, namespace: String) extends RenkuPage with
 
       def futureMergeRequestBanner(implicit webDriver: WebDriver): WebElement = eventually {
         findAll(cssSelector("div.alert-warning > p"))
-          .find(_.text == "Do you want to create a merge request for branch")
+          .find(_.text == " Do you want to create a merge request for branch test-branch?")
           .getOrElse(fail("No future merge requests banner found"))
       }
+
+      def createMergeRequestButton(implicit webDriver: WebDriver): WebElement = eventually {
+        findAll(cssSelector(".btn.btn-success")).find(_.text == "Create Merge Request") getOrElse fail(
+          "Create Merge Request button not found"
+        )
+      }
+
+      def mrTitleElements(implicit webDriver: WebDriver): List[WebBrowser.Element] = eventually {
+        findAll(cssSelector("span.issue-title a")) toList
+      }
+
+      def mergeRequestsTitle(implicit webDriver: WebDriver): List[String] =
+        mrTitleElements.map(_.text)
+
     }
 
     object Issues {
