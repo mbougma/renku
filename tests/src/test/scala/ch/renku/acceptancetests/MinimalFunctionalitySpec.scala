@@ -24,8 +24,6 @@ class MinimalFunctionalitySpec
 
     implicit val loginType: LoginType = logIntoRenku
 
-    implicit val docsScreenshots = new DocsScreenshots(this, browser)
-
     implicit val projectDetails: ProjectDetails = ProjectDetails.generate
 
     createNewProject
@@ -55,8 +53,11 @@ class MinimalFunctionalitySpec
 
   }
 
-  def addChangeToProject(implicit projectDetails: ProjectDetails, docsScreenshots: DocsScreenshots): Unit = {
-    val projectPage    = ProjectPage()
+  def addChangeToProject(implicit projectDetails: ProjectDetails): Unit = {
+    val projectPage = ProjectPage()
+    implicit val docsScreenshots = new DocsScreenshots(this, browser) {
+      override lazy val captureScreenshots: Boolean = false
+    }
     val jupyterLabPage = launchEnvironment
 
     When("the user clicks on the Terminal icon")

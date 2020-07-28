@@ -66,22 +66,6 @@ trait Collaboration {
     sleep(3 seconds)
   }
 
-  def addBranchToProjectInGitLab(implicit projectDetails: ProjectDetails, gitLabBaseUrl: GitLabBaseUrl): Unit = {
-    val projectPage = ProjectPage()
-    When("the user clicks on the 'View in GitLab' button")
-    click on projectPage.viewInGitLab sleep (3 seconds)
-    Then("a new tab with GitLab page should open")
-    val gitLabPages = GitLabPages()
-    verify browserSwitchedTo gitLabPages.ProjectPage sleep (1 second)
-    Then("the user navigates to the Branches Page")
-    go to gitLabPages.ProjectBranchesPage
-    verify browserSwitchedTo gitLabPages.ProjectBranchesPage sleep (1 second)
-    Then("the user navigates to the the New Branch Page")
-    go to gitLabPages.NewBranchPage
-    verify browserSwitchedTo gitLabPages.NewBranchPage sleep (1 second)
-    Then("the fills in the new branch form")
-  }
-
   def verifyBranchWasAdded(implicit projectDetails: ProjectDetails): Unit = {
     val projectPage = ProjectPage()
     When("the user navigates to the Collaboration tab")

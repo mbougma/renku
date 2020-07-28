@@ -38,9 +38,6 @@ class GitLabPages(
       s"/gitlab/${userCredentials.userNamespace}/${projectDetails.title.toPathSegment}"
     )
 
-    // val branchesPath: String =
-    //   s"/gitlab/${userCredentials.userNamespace}/${projectDetails.title.toPathSegment}/-/branches"
-
     override val title: Title = Refined.unsafeApply(
       s"${userCredentials.fullName} / ${projectDetails.title} · GitLab"
     )
@@ -54,18 +51,6 @@ class GitLabPages(
     def repositoryLink(implicit webDriver: WebDriver): WebElement = eventually {
       find(cssSelector("#js-onboarding-repo-link")) getOrElse fail("Repository link not found")
     }
-
-    // def projectBranchesButton(implicit webDriver: WebDriver): WebElement = eventually {
-    //   find(
-    //     //cssSelector(".btn-success")
-    //     cssSelector( //s"a[href='$path/environments/new']"
-    //       ".project-stats > div > ul > li:nth-child(2) > a"
-    //       //s"a.nav-link.stat-link.d-flex.align-items-center[href='$branchesPath']"
-    //     )
-    //   ) getOrElse fail(
-    //     "Advanced -> Branches button not found for: " + branchesPath
-    //   )
-    // }
   }
 
   case object GitLabProjectsPage extends GitLabPage {
@@ -113,23 +98,6 @@ class GitLabPages(
           .getOrElse(fail("Advanced -> Project removal Confirm button not found"))
           .click()
       }
-    }
-  }
-
-  case object ProjectBranchesPage extends GitLabPage {
-
-    override val path: Path = Refined.unsafeApply(
-      s"/gitlab/${userCredentials.userNamespace}/${projectDetails.title.toPathSegment}/-/branches"
-    )
-
-    override val title: Title = Refined.unsafeApply(
-      s"General · Branches · ${userCredentials.fullName} / ${projectDetails.title} · GitLab"
-    )
-
-    override def pageReadyElement(implicit webDriver: WebDriver): Option[WebElement] = Some(newBranchButton)
-
-    def newBranchButton(implicit webDriver: WebDriver): WebElement = eventually {
-      find(cssSelector(s"a[href='$path/new']")) getOrElse fail("New Branch button not found")
     }
   }
 
